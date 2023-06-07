@@ -1,7 +1,7 @@
 import numpy as np
 
 # 平衡資料
-def blanceData(dataXs, dataYs, fnames):
+def balanceData(dataXs, dataYs, fnames):
     # 預設2分類，dataYs為分類代號
     idx0 = np.where(dataYs == 0)[0]
     idx1 = np.where(dataYs == 1)[0]

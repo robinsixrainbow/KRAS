@@ -47,6 +47,7 @@ def ProxyAnchorLoss(y_true, y_pred):
 def get_classification_models_network_3D_trip(
         lrVal=0.1,
         beta_1Val=0.999,
+        useMetricModel=True,
     ):
     IMG_SIZE = (40, 40, 40)
     embedding_size = 64
@@ -61,22 +62,29 @@ def get_classification_models_network_3D_trip(
     x = Flatten()(x)
     x = ReLU()(x)
 
+    if not useMetricModel:
+        embedding_size = 2
+
     base_networkX = Dense(units=embedding_size,
         kernel_regularizer=regularizers.L1(1e-5),
         bias_regularizer=regularizers.L1(1e-4),
         activity_regularizer=regularizers.L1(1e-5)
     )(x)
-    print("base_networkX = ", base_networkX)
     base_network = Model(img_input_1, base_networkX)
-    base_network.summary()
+    # base_network.summary()
     
     opt = Adam(lr=lrVal, beta_1=beta_1Val)  # choose optimiser. RMS is good too!
 
-    base_network.compile(loss=ProxyAnchorLoss,
-        optimizer=opt,
-        run_eagerly=True
-        )
-    
+    if not useMetricModel:
+        base_network.compile(loss='binary_crossentropy',
+            optimizer=opt,
+            run_eagerly=True
+            )
+    else:
+        base_network.compile(loss=ProxyAnchorLoss,
+            optimizer=opt,
+            run_eagerly=True
+            )
     return base_network
 
 def getStep2TrainModel(base_network, lrVal=0.1, beta_1Val=0.999):
